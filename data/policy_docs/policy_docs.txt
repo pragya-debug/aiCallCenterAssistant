@@ -1,0 +1,117 @@
+Customer Service Policy – Call Center Operations
+1. Greeting Standards
+
+All customer service representatives must begin calls with a professional greeting.
+
+Required greeting format:
+
+Introduce yourself
+Mention company name
+Offer assistance
+
+Example:
+
+"Thank you for calling ABC Telecom. My name is Sarah. How may I assist you today?"
+
+Failure to provide a greeting reduces the Greeting Quality Score.
+
+2. Identity Verification Policy
+
+Agents must verify customer identity before accessing or modifying accounts.
+
+Accepted verification methods:
+
+Last 4 digits of SSN
+Registered phone number
+Account PIN
+Date of birth
+
+Agents must not disclose account information until verification is completed.
+
+3. Empathy and Tone Guidelines
+
+Agents must maintain a professional and empathetic tone throughout the call.
+
+Empathy examples:
+
+"I understand how frustrating this must be."
+"Let me help resolve this for you."
+
+The agent must avoid:
+
+Interrupting the customer
+Defensive language
+Blaming the customer
+
+Empathy is evaluated in the QA scoring rubric.
+
+4. Problem Resolution Policy
+
+Agents must follow these steps to resolve customer issues:
+
+Listen carefully to the customer problem.
+Confirm understanding of the issue.
+Provide troubleshooting steps or solutions.
+Confirm resolution with the customer.
+
+Example confirmation:
+
+"Does this solution resolve the issue for you?"
+
+If the issue cannot be resolved, the agent must escalate to Tier 2 support.
+
+5. Escalation Guidelines
+
+Escalation should occur when:
+
+Issue cannot be resolved within 10 minutes
+Customer requests supervisor
+Billing disputes exceed $100
+Technical issues require engineering support
+
+Agents must clearly explain escalation steps to the customer.
+
+Example:
+
+"I will escalate this to our technical team who will contact you within 24 hours."
+
+6. Compliance and Privacy Policy
+
+Agents must protect customer privacy at all times.
+
+Prohibited actions:
+
+Sharing personal data without verification
+Recording sensitive data in notes
+Discussing customer accounts with unauthorized persons
+
+All calls are recorded for quality assurance and training purposes.
+
+7. Call Closing Standards
+
+Agents must close calls professionally.
+
+Required steps:
+
+Confirm issue resolution
+Ask if further assistance is needed
+Thank the customer
+
+Example closing:
+
+"Is there anything else I can assist you with today?"
+
+"Thank you for calling ABC Telecom. Have a great day."
+
+8. QA Scoring Rubric
+
+Quality scoring agents should evaluate calls using the following rubric:
+
+Category	Description	                            Score Range
+Greeting	Proper introduction and professionalism	        1–10
+Empathy	        Understanding customer emotions	                1–10
+Professionalism	Tone and communication	                        1–10
+Resolution	Effectiveness of problem solving	        1–10
+Compliance	Adherence to verification and privacy rules	1–10
+
+Overall QA Score = Average of all categories.
