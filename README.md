@@ -46,7 +46,7 @@ Transcription Agent	Converts speech to text
 Summarization Agent	Generates structured call summary
 Policy Retriever	Retrieves QA policies via vector similarity
 QA Scoring Agent	Evaluates call against policies
-Routing Agent	        Controls conditional flow between agents
+Routing Agent           Controls conditional flow between agents
 ```
 
 🗂 Project Structure
@@ -99,20 +99,26 @@ The workflow state is defined as a typed dictionary.
 🤖 Routing Agent
 The routing agent determines workflow transitions based on model output.
   Examples:
-
-  Condition	        Next Step
-  - Transcript empty	retry transcription
-  - Summary generated	run QA scoring
-  - QA score generated	end workflow
-
+  ```
+      Condition	                Next Step
+  - Transcript empty	     retry transcription
+  - Summary generated	     run QA scoring
+  - QA score generated	     end workflow
+  ```
 
 ⚙️ Installation
 1. Clone the repository
   - git clone https://github.com/pragya-debug/aiCallCenterAssistant.git
   - cd aiCallCenterAssistant
 
+2. Set the environment variables OPENAI_API_KEY=<your-openaikey>, KMP_DUPLICATE_LIB_OK=TRUE
+
+3. Install all the dependencies.
+
+
 🖥 Streamlit UI
 To run the interactive UI:
+```
 streamlit run ui/streamlit_app.py
 
   UI Features:
@@ -121,6 +127,10 @@ streamlit run ui/streamlit_app.py
   - View summary
   - View QA score
   - Visualize agent workflow
+```
+Sample audio files are available for testing at aiCallCenterAssistant/data/sample_transcripts
+NOTE: Errors such as ```.. multiple copies of the OpenMP runtime have been linked ..```,
+set env variable KMP_DUPLICATE_LIB_OK=TRUE
 
 
 🚀 Future Improvements
