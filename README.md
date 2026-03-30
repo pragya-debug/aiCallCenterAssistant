@@ -49,13 +49,14 @@ QA Scoring Agent	Evaluates call against policies
 Routing Agent           Controls conditional flow between agents
 ```
 
+
 🗂 Project Structure
 ```
-aiCallCenterAssistant_ver1/
+aiCallCenterAssistant/
 │
 ├── agents/
 │   ├── intake_agent.py
-    |-- transcription_agent.py
+│   ├── transcription_agent.py
 │   ├── summarization_agent.py
 │   ├── qa_agent.py
 │   └── routing_agent.py
@@ -76,6 +77,7 @@ aiCallCenterAssistant_ver1/
 └── README.md
 ```
 
+
 🧠 Workflow Orchestration
 The pipeline is implemented using LangGraph which manages agent execution and state transitions.
 
@@ -90,6 +92,7 @@ The workflow state is defined as a typed dictionary.
     summary: Optional[Dict]
     qa_score: Optional[Dict]
   ```
+
 
 🔎 Policy Retrieval
   - QA policies are stored as embeddings using FAISS.
@@ -106,7 +109,9 @@ The routing agent determines workflow transitions based on model output.
   - QA score generated	     end workflow
   ```
 
+
 ⚙️ Installation
+Local (tested on mac):
 1. Clone the repository
   - git clone https://github.com/pragya-debug/aiCallCenterAssistant.git
   - cd aiCallCenterAssistant
@@ -118,8 +123,8 @@ The routing agent determines workflow transitions based on model output.
 
 🖥 Streamlit UI
 To run the interactive UI:
-```
-streamlit run ui/streamlit_app.py
+  ```
+  streamlit run ui/streamlit_app.py
 
   UI Features:
   - Upload call audio
@@ -127,14 +132,13 @@ streamlit run ui/streamlit_app.py
   - View summary
   - View QA score
   - Visualize agent workflow
-```
+  ```
 Sample audio files are available for testing at aiCallCenterAssistant/data/sample_transcripts
 NOTE: Errors such as ```.. multiple copies of the OpenMP runtime have been linked ..```,
 set env variable KMP_DUPLICATE_LIB_OK=TRUE
 
 
 🚀 Future Improvements
-  Potential enhancements:
 
   - Redis-based workflow memory
   - Call format recommendation
@@ -143,9 +147,11 @@ set env variable KMP_DUPLICATE_LIB_OK=TRUE
 
 
 🛠 Technologies Used
+  ```
   - Technology	              Role
   - Python	        Core implementation
   - LangGraph	        Agent orchestration
   - FAISS	        Policy vector retrieval
   - Streamlit	        UI
   - LLM APIs	        Summarization and QA
+  ```
