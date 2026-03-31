@@ -8,6 +8,8 @@ from agents.transcription_agent import transcription_agent
 from agents.routing_agent import routing_agent
 from utils.agent_graph import build_graph
 from utils.check_audio import is_audio_file
+import zipfile
+import io
 
 graph = build_graph()
 st.set_page_config(page_title="Call Analyzer", layout="wide")
@@ -16,7 +18,28 @@ st.title("📞 AI Call Center Assistant")
 tab1, tab2 = st.tabs(["Call Analyzer","Langraph Agent Workflow"])
 
 with tab1:
+    sample_dir_path = os.path.join("data", "sample_transcripts")
+    st.subheader("Download Sample Audio Dataset")
+
+    # Create ZIP in memory
+    zip_buffer = io.BytesIO()
+
+    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+      for file in os.listdir(sample_dir_path):
+        file_path = os.path.join(sample_dir_path, file)
+        zip_file.write(file_path, arcname=file)
+
+    zip_buffer.seek(0)
+
+    st.download_button(
+      label="Download Sample Audio Files",
+      data=zip_buffer,
+      file_name="call_analyzer_sample_audio_dataset.zip",
+      mime="application/zip"
+    )    
+
     uploaded_file = st.file_uploader("Upload Call Audio", type=["wav", "mp3", "m4a", "ogg"])
+    
     if uploaded_file:
         if not is_audio_file(uploaded_file):
             st.error("❌ Please upload a valid audio file")

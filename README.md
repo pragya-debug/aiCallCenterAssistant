@@ -12,6 +12,11 @@ A modular LLM-powered call analysis pipeline that processes customer support aud
  - 🤖 Agent orchestration using LangGraph
  - 🔀 Routing Agents and fallback mechanism
 
+✅ Access the Assistant UI via Amazon's AWS EC2
+  ```
+  http://3.142.201.248:8501
+  ```
+  You can download sample audio files from the UI to use.
 
 🧩 Architecture Overview
 
@@ -79,10 +84,12 @@ aiCallCenterAssistant/
 
 
 🧠 Workflow Orchestration
+
 The pipeline is implemented using LangGraph which manages agent execution and state transitions.
 
 
 🧾 State Model
+
 The workflow state is defined as a typed dictionary.
   ```
   from typing import TypedDict, Optional, Dict
@@ -100,6 +107,7 @@ The workflow state is defined as a typed dictionary.
 
 
 🤖 Routing Agent
+
 The routing agent determines workflow transitions based on model output.
   Examples:
   ```
@@ -111,6 +119,7 @@ The routing agent determines workflow transitions based on model output.
 
 
 ⚙️ Installation
+
 Local (tested on mac):
 1. Clone the repository
   - git clone https://github.com/pragya-debug/aiCallCenterAssistant.git
@@ -118,12 +127,19 @@ Local (tested on mac):
 
 2. Set the environment variables OPENAI_API_KEY=<your-openaikey>, KMP_DUPLICATE_LIB_OK=TRUE
 
-3. Install all the dependencies.
+3. Install all the dependencies
+   ``` 
+   streamlit langgraph langchain faiss-cpu openai whisper dotenv
+   langchain-community langchain-openai ffmpeg
+   ```
 
 
 🖥 Streamlit UI
+
 To run the interactive UI:
   ```
+  Locally:
+  cd aiCallCenterAssistant
   streamlit run ui/streamlit_app.py
 
   UI Features:
@@ -149,9 +165,9 @@ set env variable KMP_DUPLICATE_LIB_OK=TRUE
 🛠 Technologies Used
   ```
   - Technology	              Role
-  - Python	        Core implementation
-  - LangGraph	        Agent orchestration
-  - FAISS	        Policy vector retrieval
-  - Streamlit	        UI
-  - LLM APIs	        Summarization and QA
+  - Python              Core implementation
+  - LangGraph           Agent orchestration
+  - FAISS               Policy vector retrieval
+  - Streamlit           UI
+  - LLM APIs            Summarization and QA
   ```
