@@ -1,4 +1,5 @@
 # summarization_agent.py
+import json
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -8,6 +9,30 @@ from typing import List
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from utils.callstate import CallState
+from pydantic import BaseModel, field_validator
+from typing import List
+
+class SummarySchema(BaseModel):
+    # enforces structured json format and avoids downstream crashes
+    summary: str
+    key_issue: str
+    resolution: str
+    action_items: List[str]
+    sentiment: str
+    tags: List[str]
+
+    @field_validator("action_items", mode="before")
+    def normalize_action_items(cls, v):
+        # If model returns a single string → convert to list
+        if isinstance(v, str):
+            return [v]
+        return v
+
+    @field_validator("tags", mode="before")
+    def normalize_tags(cls, v):
+        if isinstance(v, str):
+            return [v]
+        return v
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -30,7 +55,7 @@ Return JSON:
 - summary
 - key_issue
 - resolution
-- action_items
+- action_items: must always be a JSON array of strings.
 - sentiment (positive, neutral, negative)
 - tags (3-5 keywords)
 
@@ -43,7 +68,18 @@ Return JSON only.
         response_format={"type": "json_object"},
     )
 
-    state["summary"] = response.choices[0].message.content
+    raw_output = response.choices[0].message.content
+
+    # validate output per SummarySchema
+    try:
+        summary_dict = json.loads(raw_output)
+        summary = SummarySchema(**summary_dict).dict()
+        state["summary"] = summary
+    except Exception as e:
+        print ("bad summary error: ", e)
+        state["error"] = "bad_summary"
+
+    state["trace"].append("summary_done")
     return state
     
 

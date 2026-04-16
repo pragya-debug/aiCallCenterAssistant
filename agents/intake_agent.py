@@ -13,5 +13,7 @@ def intake_agent(input_data):
     return {
         "audio_path": input_data.get("audio_path"),
         "transcript": input_data.get("transcript"),
-        "metadata": validation_result["metadata"]
+        "metadata": validation_result["metadata"],
+        "trace": ["intake done"],
+        "retry_count": 0
     }

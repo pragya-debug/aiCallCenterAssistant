@@ -15,7 +15,7 @@ graph = build_graph()
 st.set_page_config(page_title="Call Analyzer", layout="wide")
 
 st.title("📞 AI Call Center Assistant")
-tab1, tab2 = st.tabs(["Call Analyzer","Langraph Agent Workflow"])
+tab1, tab2, tab3, tab4 = st.tabs(["Call Analyzer","Langraph Agent Workflow","Execution Trace", "Call Recommendations"])
 
 with tab1:
     sample_dir_path = os.path.join("data", "sample_transcripts")
@@ -38,7 +38,7 @@ with tab1:
       mime="application/zip"
     )    
 
-    uploaded_file = st.file_uploader("Upload Call Audio", type=["wav", "mp3", "m4a", "ogg"])
+    uploaded_file = st.file_uploader("Upload Call Audio", type=["wav", "mp3", "m4a"])
     
     if uploaded_file:
         if not is_audio_file(uploaded_file):
@@ -51,9 +51,10 @@ with tab1:
             with st.spinner("Analyzing..."):
                 with open("temp_audio.wav", "wb") as f:
                     f.write(uploaded_file.read())
-                result = graph.invoke({
+                st.session_state["result"] = graph.invoke({
 	            "audio_path": "temp_audio.wav"
                 })
+                result = st.session_state["result"]
         except Exception as e:
             st.warning("=== Please upload a valid audio file. Check error details below ====")
             st.exception(e)
@@ -65,7 +66,8 @@ with tab1:
         col1, col2 = st.columns(2)
 
         with col1:
-            rsummary = json.loads(result["summary"])
+            #rsummary = json.loads(result["summary"])
+            rsummary = result["summary"]
             st.subheader("Summary")
             st.write(rsummary["summary"])
         
@@ -79,15 +81,19 @@ with tab1:
             st.write(rsummary["sentiment"])
 
         with col2:
-            rqa_score = json.loads(result["qa_score"])
-            st.subheader("Quality Scores")
-            st.metric("Empathy", rqa_score["Empathy"])
-            st.metric("Professionalism", rqa_score["Professionalism"])
-            st.metric("Resolution", rqa_score["Resolution"])
-            st.metric("Tone", rqa_score["Tone"])
+            #rqa_score = json.loads(result["qa_score"])
+            rqa_score = result["qa_score"]
+            st.subheader("Quality Scores (1-10)")
+            st.metric("Empathy", rqa_score["empathy"])
+            st.metric("Professionalism", rqa_score["professionalism"])
+            st.metric("Resolution", rqa_score["resolution"])
+            st.metric("Tone", rqa_score["tone"])
 
             st.subheader("Action Items")
-            st.write(rsummary["action_items"])
+            for aitems in rsummary["action_items"]:
+                #st.write(rsummary["action_items"])
+                st.markdown(f"- {aitems}")
+
 
         st.subheader("Tags")
         for tag in rsummary["tags"]:
@@ -105,3 +111,20 @@ with tab2:
         5. Routing Agent handles retries and fallback
     """)
     st.image(graph.get_graph().draw_mermaid_png())
+
+with tab3:
+    st.subheader("Execution trace")
+    rtrace = st.session_state.get("result")
+    if rtrace is not None:
+        rtrace_logs = rtrace.get("trace", [])
+        st.code("\n".join(rtrace_logs))
+
+with tab4:
+    st.subheader("Recommendations for Improvement")
+    rec_result = st.session_state.get("result")
+    if rec_result and rec_result.get("recommendation"):
+        st.json(rec_result["recommendation"])
+        if rec_result.get("improved_transcript"):
+            st.text_area("Improved transcript", rec_result["improved_transcript"], height=250)
+    else:
+        st.write("Recommendation is not available. It is possible that call resolution is within approved limits ( > 5).")

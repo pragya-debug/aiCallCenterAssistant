@@ -1,18 +1,33 @@
 #routing_agent.py
+from utils.logger import log_step
+MAX_STEPS = 5
 
 def routing_agent(state):
 
-    transcript = state.get("transcript")
-    summary = state.get("summary")
-    qa_score = state.get("qa_score")
+   state["retry_count"] = state.get("retry_count", 0) + 1
+   # STOP infinite loops
+   if state["retry_count"] > MAX_STEPS:
+        state["error"] = "max_steps_exceeded"
+        return "__end__"
 
-    if transcript is None or len(transcript) < 10:
-        return "retry_transcription"
+   #centralized error driven routing, cleaner and scalable
+   if state.get("error") == "bad_transcript":
+        log_step("error bad_transcript")
+        return "transcription_agent"
 
-    if summary is None or len(summary) < 20:
-        return "retry_summary"
+   if state.get("error") == "bad_summary":
+        log_step("error bad_summary")
+        return "summarization_agent"
 
-    if qa_score is None:
-        return "retry_qa"
+   if state.get("error") == "bad_qa":
+        log_step("error bad_qa")
+        return "qa_agent"
 
-    return "complete"
+   qa_score = state.get("qa_score", {}).get("resolution", 0)
+
+   # if resolution score is <= 50% (ie 5/10) then ask for recommendation
+   if qa_score <= 5 and not state.get("recommendation"):
+        return "recommendation_agent"
+
+   state["trace"].append("complete")
+   return "__end__"
