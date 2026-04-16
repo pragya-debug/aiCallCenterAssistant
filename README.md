@@ -1,6 +1,6 @@
 📞 AI Call Center Assistant
 
-A modular LLM-powered call analysis pipeline that processes customer support audio calls and produces structured QA evaluation reports.
+Multi-agent AI system that converts call center audio into structured insights, QA scores, and coaching recommendations using LLMs, RAG, and LangGraph.
 
  The system performs:
 
