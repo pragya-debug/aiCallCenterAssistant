@@ -53,15 +53,15 @@ Routing Agent
    └── complete → End Workflow (Structured Call Evaluation)
 
 Key components
-Component	        Purpose
-Audio Input	        Call recording ingestion
-Transcription Agent	Converts speech to text
-Summarization Agent	Generates structured call summary
-Policy Retriever	Retrieves QA policies via vector similarity
-QA Scoring Agent	Evaluates call against policies
+Component               Purpose
+Audio Input             Call recording ingestion
+Transcription Agent     Converts speech to text
+Summarization Agent     Generates structured call summary
+Policy Retriever        Retrieves QA policies via vector similarity
+QA Scoring Agent        Evaluates call against policies
 Routing Agent           Controls conditional flow between agents
 Execution Tracing       Trace the agents called during execution
-Recommendation Agent	Recommends improved steps/transcript to enhance Quality
+Recommendation Agent    Recommends improved steps/transcript to enhance Quality
 ```
 
 
@@ -131,12 +131,12 @@ The routing agent determines workflow transitions based on model output.
   Examples:
   ```
       Condition	                Next Step
-  - Transcript empty	     retry transcription
+  - Transcript empty         retry transcription
   - Transcript generated     run summarization
-  - Summarization empty	     retry summarization
-  - Summary generated	     run QA scoring
-  - QA score empty	     retry QA Scoring
-  - QA score generated	     if score <= 50%, ask recommendation else, end workflow
+  - Summarization empty      retry summarization
+  - Summary generated        run QA scoring
+  - QA score empty           retry QA Scoring
+  - QA score generated       if score <= 50%, ask recommendation else, end workflow
   - Recommendation created   end workflow
   ```
 
@@ -183,10 +183,10 @@ set env variable KMP_DUPLICATE_LIB_OK=TRUE
 
 CallSense includes a built-in evaluation framework that automatically validates pipeline outputs across five safety and quality dimensions.
 
-### Why Evaluation Matters
+** Why Evaluation Matters **
 AI systems produce probabilistic outputs — unlike traditional software, the same input can produce varying results. The evaluation framework catches quality issues, hallucinations, and safety gaps before they reach end users.
 
-### Five Evaluation Dimensions
+** Five Evaluation Dimensions **
 
 | Dimension | What It Checks | Pass Criteria |
 |-----------|---------------|---------------|
@@ -196,7 +196,7 @@ AI systems produce probabilistic outputs — unlike traditional software, the sa
 | Routing Logic | Correct agent triggered based on QA score — low scores must route to recommendation agent | Score-based routing |
 | Recommendation Presence | Coaching recommendation present for low-scoring calls — missing recommendation is a safety gap | Required when QA < 0.5 |
 
-### Running Evaluations
+** Running Evaluations **
 
 ```bash
 # Run evaluation suite against sample outputs
@@ -206,7 +206,7 @@ python evaluate.py
 python -m pytest tests/test_evaluate.py -v
 ```
 
-### Sample Evaluation Report
+** Sample Evaluation Report **
 
 ```json
 {
@@ -224,7 +224,7 @@ python -m pytest tests/test_evaluate.py -v
 }
 ```
 
-### Test Coverage
+** Test Coverage **
 - 44 pytest unit tests covering pass cases, fail cases, edge cases, and boundary conditions
 - Tests organized by evaluation dimension
 - All 44 tests passing
