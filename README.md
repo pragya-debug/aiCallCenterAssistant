@@ -91,6 +91,7 @@ aiCallCenterAssistant/
 │   ├── summarization_agent.py
 │   ├── qa_agent.py
 │   └── routing_agent.py
+│   ├── evaluation_agent.py
 │   └── recommendation_agent.py
 │
 ├── utils/
@@ -142,6 +143,11 @@ The workflow state is defined as a typed dictionary.
     trace: list[str]
     next: str
 
+    # Evaluation outputs
+    eval_report: Optional[Dict]
+    eval_pass_rate: Optional[float]
+    eval_passed: Optional[int]
+    eval_total: Optional[int]
   ```
 
 
@@ -156,13 +162,15 @@ The routing agent determines workflow transitions based on model output.
   Examples:
   ```
       Condition	                Next Step
-  - Transcript empty         retry transcription
-  - Transcript generated     run summarization
-  - Summarization empty      retry summarization
-  - Summary generated        run QA scoring
-  - QA score empty           retry QA Scoring
-  - QA score generated       if score <= 50%, ask recommendation else, end workflow
-  - Recommendation created   end workflow
+  - Transcript empty         retry Transcription Agent
+  - Transcript generated     run Summarization Agent
+  - Summarization empty      retry Summarization Agent
+  - Summary generated        run QA Scoring Agent
+  - QA score empty           retry QA Scoring Agent
+  - QA score <= 50%          run Recommendation Agent
+  - QA score > 50%           run Evaluation Agent
+  - Recommendation created   run Evaluation Agent
+  - Evaluation run           end workflow
   ```
 
 
@@ -170,23 +178,28 @@ The routing agent determines workflow transitions based on model output.
 
 Local (tested on mac):
 1. Clone the repository
-  - git clone https://github.com/pragya-debug/aiCallCenterAssistant.git
-  - cd aiCallCenterAssistant
+  ```
+  git clone https://github.com/pragya-debug/aiCallCenterAssistant.git
+  cd aiCallCenterAssistant
+  ```
 
-2. Set the environment variables OPENAI_API_KEY=<your-openaikey>, KMP_DUPLICATE_LIB_OK=TRUE
+2. Set the environment variables
+   Create a `.env` file in the root folder and add keys:
+   ```
+   touch .env
+   OPENAI_API_KEY=your_openai_api_key_here
+   KMP_DUPLICATE_LIB_OK=TRUE
+   ```
 
 3. Install all the dependencies
    ``` 
-   streamlit langgraph langchain faiss-cpu openai whisper dotenv
+   streamlit langgraph langchain faiss-cpu openai whisper python-dotenv
    langchain-community langchain-openai ffmpeg pytest
    ```
-
-
 🖥 Streamlit UI
 
 To run the interactive UI:
   ```
-  Locally:
   cd aiCallCenterAssistant
   streamlit run ui/streamlit_app.py
 
@@ -196,22 +209,21 @@ To run the interactive UI:
   - View summary
   - View QA score
   - Visualize agent workflow
-  - Execution Trace
+  - Execution Trace 
   - Recommendation of quality improvement and improved transcript
+  - Evaluation results
   ```
 Sample audio files are available for testing at aiCallCenterAssistant/data/sample_transcripts
-NOTE: Errors such as ```.. multiple copies of the OpenMP runtime have been linked ..```,
-set env variable KMP_DUPLICATE_LIB_OK=TRUE
 
 
 🛡️ Evaluation Framework
 
 CallSense includes a built-in evaluation framework that automatically validates pipeline outputs across five safety and quality dimensions.
 
-** Why Evaluation Matters **
+**Why Evaluation Matters**
 AI systems produce probabilistic outputs — unlike traditional software, the same input can produce varying results. The evaluation framework catches quality issues, hallucinations, and safety gaps before they reach end users.
 
-** Five Evaluation Dimensions **
+**Five Evaluation Dimensions**
 
 | Dimension | What It Checks | Pass Criteria |
 |-----------|---------------|---------------|
@@ -221,7 +233,7 @@ AI systems produce probabilistic outputs — unlike traditional software, the sa
 | Routing Logic | Correct agent triggered based on QA score — low scores must route to recommendation agent | Score-based routing |
 | Recommendation Presence | Coaching recommendation present for low-scoring calls — missing recommendation is a safety gap | Required when QA < 0.5 |
 
-** Running Evaluations **
+**Running Evaluations**
 
 ```bash
 # Run evaluation suite against sample outputs
@@ -231,7 +243,7 @@ python evaluate.py
 python -m pytest tests/test_evaluate.py -v
 ```
 
-** Sample Evaluation Report **
+**Sample Evaluation Report**
 
 ```json
 {
@@ -249,7 +261,7 @@ python -m pytest tests/test_evaluate.py -v
 }
 ```
 
-** Test Coverage **
+**Test Coverage**
 - 44 pytest unit tests covering pass cases, fail cases, edge cases, and boundary conditions
 - Tests organized by evaluation dimension
 - All 44 tests passing
@@ -257,9 +269,16 @@ python -m pytest tests/test_evaluate.py -v
 
 🚀 Future Improvements
 
+  **Bug Fixes & Pipeline Improvements**
+  - Fix summary faithfulness — improve summarization agent grounding to reduce hallucination
+  - Fix routing state — preserve next agent field through evaluation step
+
+  **Evaluation Enhancements**
+  - LLM as judge — use second LLM to evaluate output quality beyond word overlap
+  - PII redaction — detect and remove personally identifiable information from transcripts
+
+  **Platform Enhancements**
   - Redis-based workflow memory
-  - Call format recommendation (in V2)
-  - Agent feedback loops (in V2)
   - Analytics dashboard
 
 
@@ -267,8 +286,12 @@ python -m pytest tests/test_evaluate.py -v
   ```
   - Technology	              Role
   - Python              Core implementation
-  - LangGraph           Agent orchestration
+  - LangGraph           Agent orchestration and pipeline management
+  - LangChain           RAG pipeline utilities
   - FAISS               Policy vector retrieval
-  - Streamlit           UI
-  - LLM APIs            Summarization and QA
+  - Streamlit           User Interface
+  - Whisper             Speech-to-text transcription
+  - OpenAI GPT-4o       LLM for summarization, QA scoring, and recommendations
+  - AWS EC2             Production deployment
+  - pytest              Eval framework unit testing
   ```
