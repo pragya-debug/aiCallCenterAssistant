@@ -50,10 +50,10 @@ Routing Agent
                 Evaluation Agent 
                         │
                         ▼
-             🛡️ Evaluation Framework
+               Evaluation Framework
                         │
                         ▼
-              📊 Evaluation Report
+                Evaluation Report
                         │
                         ▼
                      __end__ (End Workflow)
@@ -214,66 +214,67 @@ Sample audio files are available for testing at aiCallCenterAssistant/data/sampl
 
 CallSense includes a built-in evaluation framework that automatically validates pipeline outputs across five safety and quality dimensions.
 
-**Why Evaluation Matters**
-AI systems produce probabilistic outputs — unlike traditional software, the same input can produce varying results. The evaluation framework catches quality issues, hallucinations, and safety gaps before they reach end users.
+  - Why Evaluation Matters
+  AI systems produce probabilistic outputs — unlike traditional software, the same input can produce varying results. 
+  The evaluation framework catches quality issues, hallucinations, and safety gaps before they reach end users.
 
-**Five Evaluation Dimensions**
+  - Five Evaluation Dimensions
 
-| Dimension | What It Checks | Pass Criteria |
-|-----------|---------------|---------------|
-| Transcription Completeness | Transcript meets minimum length — short transcript indicates transcription failure | > 50 characters |
-| Summary Faithfulness | Summary words are grounded in transcript — detects hallucination | > 40% word overlap |
-| QA Score Validity | Quality score is within valid range — invalid score indicates scoring agent failure | 0.0 – 1.0 |
-| Routing Logic | Correct agent triggered based on QA score — low scores must route to recommendation agent | Score-based routing |
-| Recommendation Presence | Coaching recommendation present for low-scoring calls — missing recommendation is a safety gap | Required when QA < 0.5 |
+  | Dimension | What It Checks | Pass Criteria |
+  |-----------|---------------|---------------|
+  | Transcription Completeness | Transcript meets minimum length — short transcript indicates transcription failure | > 50 characters |
+  | Summary Faithfulness | Summary words are grounded in transcript — detects hallucination | > 40% word overlap |
+  | QA Score Validity | Quality score is within valid range — invalid score indicates scoring agent failure | 0.0 – 1.0 |
+  | Routing Logic | Correct agent triggered based on QA score — low scores must route to recommendation agent | Score-based routing |
+  | Recommendation Presence | Coaching recommendation present for low-scoring calls — missing recommendation is a safety gap | Required when QA < 0.5 |
 
-**Running Evaluations**
+  - Running Evaluations
 
-```bash
-# Run evaluation suite against sample outputs
-python evaluate.py
+  ```bash
+  # Run evaluation suite against sample outputs
+  python evaluate.py
 
-# Run full unit test suite — 44 tests
-python -m pytest tests/test_evaluate.py -v
-```
+  # Run full unit test suite — 44 tests
+  python -m pytest tests/test_evaluate.py -v
+  ```
 
-**Sample Evaluation Report**
+  - Sample Evaluation Report
 
-```json
-{
-  "timestamp": "2026-07-25T10:00:00",
-  "pass_rate": 1.0,
-  "passed": 5,
-  "total": 5,
-  "results": [
-    {"test_name": "transcription_completeness", "passed": true, "score": 1.0},
-    {"test_name": "summary_faithfulness", "passed": true, "score": 0.82},
-    {"test_name": "qa_score_validity", "passed": true, "score": 1.0},
-    {"test_name": "routing_logic", "passed": true, "score": 1.0},
-    {"test_name": "recommendation_presence", "passed": true, "score": 1.0}
-  ]
-}
-```
+  ```json
+  {
+    "timestamp": "2026-07-25T10:00:00",
+    "pass_rate": 1.0,
+    "passed": 5,
+    "total": 5,
+    "results": [
+      {"test_name": "transcription_completeness", "passed": true, "score": 1.0},
+      {"test_name": "summary_faithfulness", "passed": true, "score": 0.82},
+      {"test_name": "qa_score_validity", "passed": true, "score": 1.0},
+      {"test_name": "routing_logic", "passed": true, "score": 1.0},
+      {"test_name": "recommendation_presence", "passed": true, "score": 1.0}
+    ]
+  }
+  ```
 
-**Test Coverage**
-- 44 pytest unit tests covering pass cases, fail cases, edge cases, and boundary conditions
-- Tests organized by evaluation dimension
-- All 44 tests passing
+  - Test Coverage
+    - 44 pytest unit tests covering pass cases, fail cases, edge cases, and boundary conditions
+    - Tests organized by evaluation dimension
+    - All 44 tests passing
 
 
 🚀 Future Improvements
 
-  **Bug Fixes & Pipeline Improvements**
-  - Fix summary faithfulness — improve summarization agent grounding to reduce hallucination
-  - Fix routing state — preserve next agent field through evaluation step
+  - Bug Fixes & Pipeline Improvements
+    Fix summary faithfulness — improve summarization agent grounding to reduce hallucination
+    Fix routing state — preserve next agent field through evaluation step
 
-  **Evaluation Enhancements**
-  - LLM as judge — use second LLM to evaluate output quality beyond word overlap
-  - PII redaction — detect and remove personally identifiable information from transcripts
+  - Evaluation Enhancements
+    LLM as judge — use second LLM to evaluate output quality beyond word overlap
+    PII redaction — detect and remove personally identifiable information from transcripts
 
-  **Platform Enhancements**
-  - Redis-based workflow memory
-  - Analytics dashboard
+  - Platform Enhancements
+    Redis-based workflow memory
+    Analytics dashboard
 
 
 🛠 Technologies Used
