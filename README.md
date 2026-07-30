@@ -15,14 +15,6 @@ Multi-agent AI system that converts call center audio into structured insights, 
  - 🛡️ Evaluation framework with automated quality and safety checks
 
 
-✅ Access the Assistant UI via Amazon's AWS EC2
-  ```
-  http: //3.134.101.96:8501  v2
-  http://3.142.201.248:8501  v1
-  ```
-  You can download sample audio files from the UI to use.
-
-
 🧩 Architecture Overview
 
 Pipeline flow:
@@ -198,10 +190,12 @@ Local (tested on mac):
    ```
 🖥 Streamlit UI
 
-To run the interactive UI:
+To run the interactive UI locally:
   ```
   cd aiCallCenterAssistant
   streamlit run ui/streamlit_app.py
+
+  Available for live demo on request.
 
   UI Features:
   - Upload call audio
@@ -292,6 +286,5 @@ python -m pytest tests/test_evaluate.py -v
   - Streamlit           User Interface
   - Whisper             Speech-to-text transcription
   - OpenAI GPT-4o       LLM for summarization, QA scoring, and recommendations
-  - AWS EC2             Production deployment
   - pytest              Eval framework unit testing
   ```
