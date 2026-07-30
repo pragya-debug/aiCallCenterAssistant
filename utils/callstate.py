@@ -12,3 +12,9 @@ class CallState(TypedDict, total=False):
     retry_count: int
     trace: list[str]
     next: str
+
+    # Evaluation outputs
+    eval_report: Optional[Dict]
+    eval_pass_rate: Optional[float]
+    eval_passed: Optional[int]
+    eval_total: Optional[int]

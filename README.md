@@ -12,6 +12,7 @@ Multi-agent AI system that converts call center audio into structured insights, 
  - 🤖 Agent orchestration using LangGraph
  - 🔀 Routing Agents and fallback mechanism
  - 🤖 Transcript Recommendation on poor quality
+ - 🛡️ Evaluation framework with automated quality and safety checks
 
 
 ✅ Access the Assistant UI via Amazon's AWS EC2
@@ -49,8 +50,21 @@ Routing Agent
    ├── retry_transcription → Transcription Agent
    ├── retry_summary → Summarization Agent
    ├── retry_qa → QA Scoring Agent
-   ├── recommendation → Recommendation Agent (if QA score <=50%)
-   └── complete → End Workflow (Structured Call Evaluation)
+   └── recommendation → Recommendation Agent (if QA score <= 50%)
+                        │
+              (all paths converge)
+                        │
+                        ▼
+                Evaluation Agent 
+                        │
+                        ▼
+             🛡️ Evaluation Framework
+                        │
+                        ▼
+              📊 Evaluation Report
+                        │
+                        ▼
+                     __end__ (End Workflow)
 
 Key components
 Component               Purpose
@@ -62,6 +76,8 @@ QA Scoring Agent        Evaluates call against policies
 Routing Agent           Controls conditional flow between agents
 Execution Tracing       Trace the agents called during execution
 Recommendation Agent    Recommends improved steps/transcript to enhance Quality
+Evaluation Framework    Validates pipeline outputs across multi dimensions
+Evaluation Report       Structured JSON report with pass rates and per-dimension results
 ```
 
 
@@ -91,6 +107,10 @@ aiCallCenterAssistant/
 ├── ui/
 │   └── streamlit_app.py
 │
+├── tests/
+│   └── test_evaluate.py
+│
+├── evaluate.py
 └── README.md
 ```
 
@@ -106,17 +126,22 @@ The workflow state is defined as a typed dictionary.
   ```
   from typing import TypedDict, Optional, Dict
   class CallState(TypedDict, total=False):
+    # Pipeline inputs
     audio_path: str
+
+    # Agent outputs
     transcript: Optional[str]
     summary: Optional[Dict]
     qa_score: Optional[Dict]
     recommendation: Optional[Dict]
     improved_transcript: str
 
+    # Flow control
     error: Optional[str]
     retry_count: int
     trace: list[str]
     next: str
+
   ```
 
 
@@ -153,7 +178,7 @@ Local (tested on mac):
 3. Install all the dependencies
    ``` 
    streamlit langgraph langchain faiss-cpu openai whisper dotenv
-   langchain-community langchain-openai ffmpeg
+   langchain-community langchain-openai ffmpeg pytest
    ```
 
 

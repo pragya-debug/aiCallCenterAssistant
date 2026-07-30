@@ -35,7 +35,7 @@ def evaluate_transcription_completeness(
     passed = len(transcript) >= min_length
 
     return {
-	"test_name": "transaction_completeness",
+	"test_name": "transcription_completeness",
 	"passed": passed,
         "score": 1.0 if passed else 0.0,
         "details": (

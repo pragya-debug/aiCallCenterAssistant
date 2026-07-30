@@ -109,6 +109,8 @@ with tab2:
         3. Summarization Agent extracts key insights  
         4. QA Agent evaluates service quality  
         5. Routing Agent handles retries and fallback
+        6. Recommendation Agent handles recommendations
+        7. Evaluation Agent handles evaluations of the pipeline.
     """)
     st.image(graph.get_graph().draw_mermaid_png())
 
@@ -118,6 +120,30 @@ with tab3:
     if rtrace is not None:
         rtrace_logs = rtrace.get("trace", [])
         st.code("\n".join(rtrace_logs))
+
+    st.subheader("Evaluation Results")
+    if rtrace is not None:
+        eval_pass_rate = rtrace.get("eval_pass_rate")
+        eval_report = rtrace.get("eval_report")
+        
+        if eval_report:
+            # Pass rate metric
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Pass Rate", f"{eval_pass_rate:.0%}")
+            with col2:
+                st.metric("Passed", rtrace.get("eval_passed", 0))
+            with col3:
+                st.metric("Total", rtrace.get("eval_total", 5))
+            
+            st.divider()
+            
+            # Per dimension results
+            for result in eval_report.get("results", []):
+                icon = "✅" if result["passed"] else "❌"
+                st.write(f"{icon} **{result['test_name']}** — {result['details']}")
+        else:
+            st.info("No evaluation results available")
 
 with tab4:
     st.subheader("Recommendations for Improvement")
