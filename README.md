@@ -265,16 +265,16 @@ CallSense includes a built-in evaluation framework that automatically validates 
 🚀 Future Improvements
 
   - Bug Fixes & Pipeline Improvements
-    Fix summary faithfulness — improve summarization agent grounding to reduce hallucination
-    Fix routing state — preserve next agent field through evaluation step
+    - Fix summary faithfulness — improve summarization agent grounding to reduce hallucination,
+    - Fix routing state — preserve next agent field through evaluation step
 
   - Evaluation Enhancements
-    LLM as judge — use second LLM to evaluate output quality beyond word overlap
-    PII redaction — detect and remove personally identifiable information from transcripts
+    - LLM as judge — use second LLM to evaluate output quality beyond word overlap
+    - PII redaction — detect and remove personally identifiable information from transcripts
 
   - Platform Enhancements
-    Redis-based workflow memory
-    Analytics dashboard
+    - Redis-based workflow memory
+    - Analytics dashboard
 
 
 🛠 Technologies Used
