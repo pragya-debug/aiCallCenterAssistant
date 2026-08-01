@@ -1,21 +1,26 @@
-#streamlit_app.py
-import json
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import io
+import tempfile
+import zipfile
 import streamlit as st
-from agents.transcription_agent import transcription_agent
-from agents.routing_agent import routing_agent
+
 from utils.agent_graph import build_graph
 from utils.check_audio import is_audio_file
-import zipfile
-import io
+
 
 graph = build_graph()
 st.set_page_config(page_title="Call Analyzer", layout="wide")
 
 st.title("📞 AI Call Center Assistant")
-tab1, tab2, tab3, tab4 = st.tabs(["Call Analyzer","Langraph Agent Workflow","Execution Trace", "Call Recommendations"])
+tab1, tab2, tab3, tab4 = st.tabs([
+    "Call Analyzer",
+    "Langraph Agent Workflow",
+    "Execution Details", 
+    "Call Recommendations"
+])
 
 with tab1:
     sample_dir_path = os.path.join("data", "sample_transcripts")
@@ -38,8 +43,11 @@ with tab1:
       mime="application/zip"
     )    
 
-    uploaded_file = st.file_uploader("Upload Call Audio", type=["wav", "mp3", "m4a"])
-    
+    uploaded_file = st.file_uploader(
+        "Upload Call Audio", 
+        type=["wav", "mp3", "m4a"]
+    )
+
     if uploaded_file:
         if not is_audio_file(uploaded_file):
             st.error("❌ Please upload a valid audio file")
@@ -47,18 +55,31 @@ with tab1:
 
         st.success("✅ Valid audio file uploaded")
 
+        # Write to temp file — unique name, cleaned up after use
+        with tempfile.NamedTemporaryFile(
+            delete=False,
+            suffix=os.path.splitext(uploaded_file.name)[1]
+        ) as tmp_file:
+            tmp_file.write(uploaded_file.read())
+            tmp_path = tmp_file.name
+
         try:
-            with st.spinner("Analyzing..."):
-                with open("temp_audio.wav", "wb") as f:
-                    f.write(uploaded_file.read())
+            with st.spinner("Analyzing call..."):
                 st.session_state["result"] = graph.invoke({
-	            "audio_path": "temp_audio.wav"
+	            "audio_path": tmp_path
                 })
                 result = st.session_state["result"]
+
         except Exception as e:
-            st.warning("=== Please upload a valid audio file. Check error details below ====")
+            st.error("❌ Analysis failed. Please try again with a valid audio file.")
             st.exception(e)
             st.stop()
+
+        finally:
+            # Always clean up temp file
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+
 
         st.subheader("Transcript")
         st.text_area("Call Transcript", result["transcript"], height=250)
@@ -66,7 +87,6 @@ with tab1:
         col1, col2 = st.columns(2)
 
         with col1:
-            #rsummary = json.loads(result["summary"])
             rsummary = result["summary"]
             st.subheader("Summary")
             st.write(rsummary["summary"])
@@ -80,8 +100,11 @@ with tab1:
             st.subheader("Sentiment")
             st.write(rsummary["sentiment"])
 
+            st.subheader("Tags")
+            for tag in rsummary["tags"]:
+                st.markdown(f"- {tag}")
+
         with col2:
-            #rqa_score = json.loads(result["qa_score"])
             rqa_score = result["qa_score"]
             st.subheader("Quality Scores (1-10)")
             st.metric("Empathy", rqa_score["empathy"])
@@ -91,26 +114,22 @@ with tab1:
 
             st.subheader("Action Items")
             for aitems in rsummary["action_items"]:
-                #st.write(rsummary["action_items"])
                 st.markdown(f"- {aitems}")
 
 
-        st.subheader("Tags")
-        for tag in rsummary["tags"]:
-            st.markdown(f"- {tag}")
         
 with tab2:
     st.subheader("LangGraph Agent Workflow")
     st.markdown("""
         ### Agent Pipeline
 
-        1. Intake Agent validates input  
-        2. Transcription Agent converts audio to text  
-        3. Summarization Agent extracts key insights  
-        4. QA Agent evaluates service quality  
-        5. Routing Agent handles retries and fallback
-        6. Recommendation Agent handles recommendations
-        7. Evaluation Agent handles evaluations of the pipeline.
+        1. Intake Agent - validates input  
+        2. Transcription Agent - converts audio to text  
+        3. Summarization Agent - extracts key insights  
+        4. QA Agent - evaluates service quality  
+        5. Routing Agent - handles retries and fallback
+        6. Recommendation Agent - handles recommendations
+        7. Evaluation Agent - handles evaluations of the pipeline.
     """)
     st.image(graph.get_graph().draw_mermaid_png())
 
@@ -130,7 +149,10 @@ with tab3:
             # Pass rate metric
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.metric("Pass Rate", f"{eval_pass_rate:.0%}")
+                st.metric(
+                    "Pass Rate",
+                    f"{eval_pass_rate:.0%}" if eval_pass_rate is not None else "N/A"
+                )
             with col2:
                 st.metric("Passed", rtrace.get("eval_passed", 0))
             with col3:
@@ -149,8 +171,25 @@ with tab4:
     st.subheader("Recommendations for Improvement")
     rec_result = st.session_state.get("result")
     if rec_result and rec_result.get("recommendation"):
-        st.json(rec_result["recommendation"])
+        rec = rec_result["recommendation"]
+
+        st.markdown("#### Improvement Areas")
+        for area in rec.get("improvement_areas", []):
+            st.markdown(f"- {area}")
+
+        st.markdown("#### Suggested Phrases")
+        for phrase in rec.get("suggested_phrases", []):
+            st.markdown(f"- {phrase}")
+
+        st.markdown("#### Overall Advice")
+        st.write(rec.get("overall_advice", ""))
+
         if rec_result.get("improved_transcript"):
-            st.text_area("Improved transcript", rec_result["improved_transcript"], height=250)
+            st.markdown("#### Improved Transcript")
+            st.text_area(
+                "Improved Transcript",
+                rec_result["improved_transcript"],
+                height=250
+            )
     else:
         st.write("Recommendation is not available. It is possible that call resolution is within approved limits ( > 5).")

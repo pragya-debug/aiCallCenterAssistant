@@ -13,10 +13,26 @@ ALLOWED_AUDIO_TYPES = [
     "audio/mp4"
 ]
 
-def is_audio_file(file):
+def is_audio_file(file) -> bool:
+    """
+    Validates uploaded file is a supported audio format.
+    Checks both file extension and MIME type.
 
+    Args:
+        file: Streamlit UploadedFile object
+
+    Returns:
+        True if file is a valid audio format, False otherwise
+    """
     extension = file.name.split(".")[-1].lower()
     mime_type, _ = mimetypes.guess_type(file.name)
-    log_step("Detected MIME:", mime_type)
 
-    return extension in ALLOWED_EXTENSIONS or mime_type in ALLOWED_MIME_TYPES
+    log_step("is_audio_file", {
+        "filename": file.name,
+        "extension": extension,
+        "mime_type": mime_type
+    })
+
+    return (extension in ALLOWED_EXTENSIONS or
+           (mime_type is not None and mime_type in ALLOWED_AUDIO_TYPES)
+    )

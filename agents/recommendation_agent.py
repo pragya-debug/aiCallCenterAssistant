@@ -1,23 +1,24 @@
-import json
-import os
-from utils.callstate import CallState
-from pydantic import BaseModel, field_validator
-from openai import OpenAI
-from typing import List
 from dotenv import load_dotenv
 load_dotenv()
+import json
+from openai import OpenAI
+import os
+from pydantic import BaseModel, field_validator
+from typing import List
+from utils.callstate import CallState
+from utils.logger import log_step
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class RecSchema(BaseModel):
-    # enforces structured json format and avoids downstream crashes
+    """Enforces structured json format and avoids downstream crashes."""
     improvement_areas: List[str]
     suggested_phrases: List[str]
     overall_advice: str
 
     @field_validator("suggested_phrases", mode="before")
     def normalize_suggested_phrases(cls, v):
-        # Ensure model returns a list
+        """Ensure suggested_phrases is always a list."""
         if isinstance(v, dict):
             return list(v.values())
         if isinstance(v, str):
@@ -26,6 +27,7 @@ class RecSchema(BaseModel):
 
     @field_validator("improvement_areas", mode="before")
     def normalize_improvement_areas(cls, v):
+        """Ensure improvement_areas is always a list."""
         if isinstance(v, dict):
             return list(v.values())
         if isinstance(v, str):
@@ -33,7 +35,23 @@ class RecSchema(BaseModel):
         return v
 
 
-def recommendation_agent(state:CallState):
+def recommendation_agent(state: CallState) -> CallState:
+    """
+    Generates coaching recommendations for low scoring calls.
+    Uses GPT-4o to analyze transcript and provide improvement areas,
+    suggested phrases, and overall advice. Also generates an improved
+    transcript applying the recommendations.
+
+    Args:
+        state: Pipeline state containing transcript and qa_score
+
+    Returns:
+        Updated state with recommendation and improved_transcript populated
+
+    Raises:
+        Exception: If LLM call or response parsing fails
+    """
+    log_step("recommendation_agent", {"status": "starting"})
 
     transcript = state.get("transcript", "")
     qa_score = state.get("qa_score", {}).get("resolution", 0)
@@ -56,29 +74,49 @@ def recommendation_agent(state:CallState):
     Return JSON only.
     """
 
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": prompt}],
-        response_format={"type": "json_object"},
-    )
-
-    raw_output = response.choices[0].message.content
-
-    # validate output per RecSchema
     try:
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"},
+        )
+
+        raw_output = response.choices[0].message.content
+
+        # validate output against RecSchema
         rec_dict = json.loads(raw_output)
-        valid_rec = RecSchema(**rec_dict).dict()
+        valid_rec = RecSchema(**rec_dict).model_dump()
         state["recommendation"] = valid_rec
-        state["improved_transcript"] = improved_transcript(valid_rec, transcript)
+        state["improved_transcript"] = generate_improved_transcript(
+	    valid_rec, transcript)
+        log_step("recommendation_agent", {"status": "complete"})
+
     except Exception as e:
-        print ("bad recommendation error: ", e)
+        log_step("recommendation_agent", {"status":"failed", "error": str(e)})
         state["error"] = "bad_recommendation"
 
-    state["trace"].append("recommendation_done")
+    if "trace" not in state or state["trace"] is None:
+        state["trace"] = []
+    state["trace"].append("recommendation_agent done")
     return state
 
 
-def improved_transcript(valid_rec, transcript):
+def generate_improved_transcript(valid_rec: dict, transcript: str) -> str:
+    """
+    Generates an improved version of the call transcript
+    applying the coaching recommendations.
+
+    Args:
+        valid_rec: Validated recommendation dictionary containing
+                   improvement_areas, suggested_phrases, overall_advice
+        transcript: Original call transcript
+
+    Returns:
+        Improved transcript as plain text string
+
+    Raises:
+        Exception: If LLM call fails
+    """
     prompt = f"""
     Improve the following call transcript using the recommendations.
 
@@ -95,18 +133,22 @@ def improved_transcript(valid_rec, transcript):
 
     Return only improved transcript as plain text.
     """
-    improved_transcript = ""
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": prompt}],
-    )
 
-    raw_output = response.choices[0].message.content
-    if raw_output is not None:
-        improved_transcript = str(raw_output)
-        print ("Improved transcript generated successfully.")
-    else:
-        improved_transcript = "No improved transcript generated."
-        print ("No Improved transcript generated.")
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": prompt}],
+        )
 
-    return improved_transcript
+        raw_output = response.choices[0].message.content
+
+        if raw_output:
+            log_step("generate_improved_transcript", {"status": "complete"})
+            return str(raw_output)
+        else:
+            log_step("generate_improved_transcript", {"status": "empty response"})
+            return "No improved transcript generated."
+
+    except Exception as e:
+        log_step("generate_improved_transcript", {"status": "failed", "error": str(e)})
+        return "No improved transcript generated."

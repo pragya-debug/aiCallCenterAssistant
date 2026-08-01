@@ -8,17 +8,19 @@ import json
 from datetime import datetime
 
 class EvalResult(TypedDict):
-	test_name: str
-	passed: bool
-	score: float
-	details: str
+    """Single evaluation dimension result."""
+    test_name: str
+    passed: bool
+    score: float
+    details: str
 
 class EvalReport(TypedDict):
-	timestamp: str
-	pass_rate: float
-	passed: int
-	total: int
-	results: list
+    """Complete evaluation report across all dimensions."""
+    timestamp: str
+    pass_rate: float
+    passed: int
+    total: int
+    results: list
 
 
 # EVAL 1 - Transcription Completeness - 
@@ -26,7 +28,7 @@ class EvalReport(TypedDict):
 def evaluate_transcription_completeness(
     transcript: str,
     min_length: int = 50
-)-> EvalResult:
+) -> EvalResult:
     """
     Check transcript meets minimum length requirement.
     A very short transcript likely indicates a transcription failure.
@@ -39,8 +41,8 @@ def evaluate_transcription_completeness(
 	"passed": passed,
         "score": 1.0 if passed else 0.0,
         "details": (
-           f"Transcript length: {len(transcript)} chars "
-           f"(minimum: {min_length})"
+            f"Transcript length: {len(transcript)} chars "
+            f"(minimum: {min_length})"
         )
     }
 

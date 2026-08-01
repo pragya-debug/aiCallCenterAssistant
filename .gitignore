@@ -3,3 +3,4 @@
 __pycache__/
 *.pyc
 .env
+eval_report_example.json

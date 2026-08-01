@@ -17,6 +17,7 @@ from evaluate import (
 # ── TRANSCRIPTION COMPLETENESS TESTS ──
 
 class TestTranscriptionCompleteness:
+    """Tests for evaluate_transcription_completeness function."""
 
     def test_long_transcript_passes(self):
         transcript = "Customer called about billing issue. " * 5
@@ -56,6 +57,7 @@ class TestTranscriptionCompleteness:
 # ── SUMMARY FAITHFULNESS TESTS ──
 
 class TestSummaryFaithfulness:
+    """Tests for evaluate_summary_faithfulness function."""
 
     def test_faithful_summary_passes(self):
         transcript = "Customer called about billing charges on their account refund requested"
@@ -98,6 +100,7 @@ class TestSummaryFaithfulness:
 # ── QA SCORE VALIDITY TESTS ──
 
 class TestQAScoreValidity:
+    """Tests for evaluate_qa_score_validity function."""
 
     def test_valid_mid_score_passes(self):
         result = evaluate_qa_score_validity(0.75)
@@ -137,6 +140,7 @@ class TestQAScoreValidity:
 # ── ROUTING LOGIC TESTS ──
 
 class TestRoutingLogic:
+    """Tests for evaluate_routing_logic function."""
 
     def test_low_score_routes_to_recommendation(self):
         result = evaluate_routing_logic(0.45, "recommendation")
@@ -175,6 +179,7 @@ class TestRoutingLogic:
 # ── RECOMMENDATION PRESENCE TESTS ──
 
 class TestRecommendationPresence:
+    """Tests for evaluate_recommendation_presence function."""
 
     def test_low_score_with_recommendation_passes(self):
         result = evaluate_recommendation_presence(
@@ -215,6 +220,7 @@ class TestRecommendationPresence:
 # ── FULL SUITE TESTS ──
 
 class TestEvaluationSuite:
+    """Integration tests for run_evaluation_suite function."""
 
     def test_good_output_all_pass(self):
         good_output = {
